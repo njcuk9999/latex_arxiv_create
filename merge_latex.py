@@ -23,10 +23,10 @@ import shutil
 # =============================================================================
 # Define variables
 # =============================================================================
-WORKSPACE = "/scratch/Journals/my_papers/Paper_June2017_submit/"
+WORKSPACE = "/scratch/Journals/my_papers/Paper_June2017_postsubmit/"
 NEWFOLDER = WORKSPACE + 'merged/'
 NEWMAIN_FILENAME = 'main.tex'
-MAIN_FILE = WORKSPACE + 'paperJune2017_V1.11.tex'
+MAIN_FILE = WORKSPACE + 'paperJune2017_ps_V4.tex'
 # -----------------------------------------------------------------------------
 
 # =============================================================================
@@ -105,6 +105,25 @@ def save_lines_as_tex(lines, filepath, filename):
     f.writelines(lines)
     f.close()
 
+def clear_comments(lines):
+    newlines = []
+    for line in lines:
+        if line[0] == '%' and line[1] != '%':
+            continue
+        else:
+            newlines.append(line)
+    return newlines
+
+def build(filepath, filename):
+    current = os.getcwd()
+    os.chdir(filepath)
+    os.system('pdflatex {0}'.format(filename))
+    os.system('pdflatex {0}'.format(filename))
+    os.system('bibtex {0}'.format(filename))
+    os.system('pdflatex {0}'.format(filename))
+    os.system('pdflatex {0}'.format(filename))
+    os.chdir(current)
+
 # =============================================================================
 # Start of code
 # =============================================================================
@@ -116,6 +135,8 @@ if __name__ == "__main__":
     lines = open_tex(MAIN_FILE)
     main_file = MAIN_FILE.split('/')[-1]
     filepath = MAIN_FILE.split(main_file)[0]
+    # clear comments:
+    lines = clear_comments(lines)
     # need to replace all /input with content
     print('\n Dealing with inputs...')
     lines = replace_input(lines, filepath)
@@ -129,6 +150,8 @@ if __name__ == "__main__":
     print('\n Saving main tex file to disk...')
     save_lines_as_tex(lines, NEWFOLDER, NEWMAIN_FILENAME)
 
+    print('\n Building...')
+    build(NEWFOLDER, NEWMAIN_FILENAME)
 
 
 # =============================================================================
